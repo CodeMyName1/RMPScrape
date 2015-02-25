@@ -1,5 +1,4 @@
 # Webscrape
----
 
 WebScrape is a data mining tool tailored to grabbing professor 
 and comment data from ratemyprofessors.com for later processing.
@@ -14,7 +13,6 @@ See NEXT STEPS section at the bottom of this file for more information regarding
 
 ## NEXT STEPS: 
 ##### (from highest-priority to lowest)
----
 * Gather complete data (not just first 20 entries) 
 * Become OS-agnostic (May already be achieved)
 * Scrape multiple pages in one run

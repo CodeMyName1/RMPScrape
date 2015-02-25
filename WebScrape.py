@@ -24,7 +24,7 @@ import os
 import sys
 from bs4 import BeautifulSoup
 
-# scrapeData takes a URL as a parameter, scrapes the data
+# scrapeData takes a URL as a parameter, and the desired data is saved to the disk
 def scrapeData ( url ):
 
     '''---------------- Begin Variables ----------------'''
@@ -61,16 +61,6 @@ def scrapeData ( url ):
 
         # Attempt to get a response from HTTP server
         response = urllib2.urlopen(req)
-        
-        # Attempt to create a database
-        con = lite.connect ('data.db')
-
-        cur = con.cursor()
-        cur.execute ('SELECT SQLITE_VERSION()')
-
-        data = cur.fetchone()
-
-        print ('SQLite version: %s' % data)
 
     # If this fails, print exception reason
     except urllib2.URLError as urlError:
@@ -92,16 +82,27 @@ def scrapeData ( url ):
             # Trigger prof name handling
             if string == 'at':
                 handlingProfName = True
-            
+                continue
+
             # Trigger comment handling
             elif string == 'Comment':
                 handlingComments = True
                 continue
 
             if handlingProfName:
-
+                
                 # Gather first and last name
                 profName = prev3 + ' ' + prev2
+
+                # Set up SQLite database
+                # Attempt to connect to  a database, create one if it does not exist
+                con = lite.connect (profName + '.db')
+
+                cur = con.cursor()
+                cur.execute ('SELECT SQLITE_VERSION()')
+
+                data = cur.fetchone()
+
 
                 # Set up directory 
                 if not os.path.exists(profName):
@@ -118,17 +119,11 @@ def scrapeData ( url ):
                      
             elif handlingComments:
                 
-                # Handle end of comment section
-                if string == 'Rate this Professor':
-                    handlingComments = False
-                    doneWithComments = True
-                    f.close()
-                    continue
-                    
                 # Handle end of single comment
-                elif string == 'report this rating':
+                if string == 'report this rating':
                     
                     # Write data to file
+                    
                     f.write( scrapedUnicode.encode( 'utf-8' ))
 
                     # Reset variable
@@ -139,7 +134,21 @@ def scrapeData ( url ):
                     f = open( fileName + str(fileNumber), 'w' )
                     continue
 
-                # Handle comment data
+                # Else handle end of comment section
+                elif string == 'Rate this Professor':
+                    
+                    # Set flags ending comment handling
+                    handlingComments = False
+                    doneWithComments = True
+                   
+                    # Write data to file
+                    f.write( scrapedUnicode.encode( 'utf-8' ))
+
+                    # Close file and continue
+                    f.close()
+                    continue
+
+                # Else, handle comment data
                 else:
                     # Add data to scrapedUnicode
                     scrapedUnicode += string + '\n'
@@ -152,13 +161,12 @@ def scrapeData ( url ):
             
             if doneWithComments and string == 'Load More':
                 print ("There is more data!!")
-
+        
     # Else, report accordingly
     else:
     	  print ("No response received.")
-
+    
 scrapeData( raw_input( 'Enter a URL: ' ) )
-
 
 '''---------------------------------------------------------------
 | NEXT STEPS (from highest-priority to lowest) :
@@ -168,11 +176,12 @@ scrapeData( raw_input( 'Enter a URL: ' ) )
 | + Scrape multiple pages in one run
 | + Convert to SQLite
 | + Support Vector Machine
+| + TF-IDF
 ---------------------------------------------------------------'''
 
 '''---------------------------------------------------------------
 | Developed by: Nicholas Rebhun  
 | Started: 11/11/2014
 | Updated: 02/03/2015
-| Version: 0.1.02
+| Version: 0.1.0.2
 ---------------------------------------------------------------'''
