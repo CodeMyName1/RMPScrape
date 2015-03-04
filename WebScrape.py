@@ -67,7 +67,7 @@ def scrapeData ( url ):
     	  print (urlError.reason)
 
     except lite.Error as sqliteError:
-        print (sqliteError.reason)
+    print (sqliteError.reason)
         sys.exit(1)
 
     # If response was successful...
